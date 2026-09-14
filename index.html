@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" sizes="32x32" href="favicon.svg">
+  <link rel="icon" type="image/x-icon" sizes="256x256" href="favicon.svg">
+  <link rel="apple-touch-icon" href="favicon.svg">
+  <title>Control Verde Pro - Thaurock</title>
+  <meta name="theme-color" content="#047857">
+  <style>
+    :root {
+      --verde-oscuro: #064e3b;
+      --verde-medio: #047857;
+      --verde-principal: #10b981;
+      --verde-claro: #a7f3d0;
+      --verde-fondo: #ecfdf5;
+      --texto-oscuro: #062c22;
+      --rojo-suave: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+
+    body {
+      background-color: var(--verde-fondo);
+      color: var(--texto-oscuro);
+      padding: 16px;
+      max-width: 600px;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      text-align: center;
+      padding: 12px 0 16px 0;
+      color: var(--verde-oscuro);
+    }
+
+    .main-content { flex: 1; }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--verde-claro);
+    }
+
+    .card h3 {
+      font-size: 15px;
+      color: var(--verde-oscuro);
+      margin-bottom: 12px;
+    }
+
+    .balance-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .balance-item h4 { font-size: 11px; color: var(--verde-medio); text-transform: uppercase; }
+    .balance-item p { font-size: 16px; font-weight: bold; margin-top: 4px; }
+    .balance-item.resto p { color: var(--verde-principal); }
+    .balance-item.gastos p { color: var(--rojo-suave); }
+
+    form { display: flex; flex-direction: column; gap: 10px; }
+
+    .form-row { display: flex; gap: 8px; }
+    .form-row > * { flex: 1; }
+
+    input, select, button {
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--verde-claro);
+      font-size: 14px;
+      outline: none;
+    }
+
+    input:focus, select:focus { border-color: var(--verde-principal); }
+
+    button {
+      background-color: var(--verde-medio);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:active { background-color: var(--verde-oscuro); }
+
+    /* Gráficos y Leyendas */
+    .chart-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 20px;
+      margin-top: 8px;
+    }
+
+    .chart-box {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+      transition: background 0.3s ease;
+    }
+
+    .chart-legend {
+      font-size: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .color-box {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    /* Lista de movimientos */
+    .lista-transacciones { list-style: none; }
+
+    .item-transaccion {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--verde-fondo);
+    }
+
+    .item-transaccion:last-child { border-bottom: none; }
+
+    .cat-badge {
+      font-size: 10px;
+      background: var(--verde-fondo);
+      color: var(--verde-medio);
+      padding: 2px 6px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    .monto-ingreso { color: var(--verde-medio); font-weight: bold; }
+    .monto-gasto { color: var(--rojo-suave); font-weight: bold; }
+
+    .btn-borrar {
+      background: none;
+      color: #9ca3af;
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+
+    .acciones-btn { display: flex; gap: 8px; margin-top: 8px; }
+    .btn-secundario { background-color: var(--verde-claro); color: var(--verde-oscuro); width: 100%; text-align: center; }
+
+    footer {
+      text-align: center;
+      padding: 20px 0 8px 0;
+      font-size: 13px;
+      color: var(--verde-medio);
+    }
+
+    footer strong { color: var(--verde-oscuro); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🌱 Control Verde Pro</h1>
+    <p>Gestión financiera local, privada y avanzada</p>
+<p>100% Local una vez cargado</p>
+  </header>
+
+  <div class="main-content">
+    <!-- Balance -->
+    <div class="card balance-grid">
+      <div class="balance-item">
+        <h4>Ingresos</h4>
+        <p id="total-ingresos">$0</p>
+      </div>
+      <div class="balance-item gastos">
+        <h4>Gastos</h4>
+        <p id="total-gastos">$0</p>
+      </div>
+      <div class="balance-item resto">
+        <h4>Disponible</h4>
+        <p id="total-disponible">$0</p>
+      </div>
+    </div>
+
+    <!-- Gráfico del Balance -->
+    <div class="card">
+      <h3>📈 Balance General (Gastos vs Saldo)</h3>
+      <div class="chart-container">
+        <div id="balance-chart" class="chart-box"></div>
+        <div id="balance-legend" class="chart-legend"></div>
+      </div>
+    </div>
+
+    <!-- Desglose por Categoría de Gastos -->
+    <div class="card">
+      <h3>📊 Categorías de Gastos</h3>
+      <div class="chart-container">
+        <div id="pie-chart" class="chart-box"></div>
+        <div id="chart-legend" class="chart-legend"></div>
+      </div>
+    </div>
+
+    <!-- Formulario de Registro -->
+    <div class="card">
+      <h3>➕ Nuevo Registro</h3>
+      <form id="form-registro">
+        <input type="text" id="concepto" placeholder="Concepto (ej. Sueldo, Alquiler)" required>
+        <div class="form-row">
+          <input type="number" id="monto" placeholder="Monto ($)" step="0.01" required>
+          <select id="tipo">
+            <option value="ingreso">Ingreso (+)</option>
+            <option value="gasto">Gasto (-)</option>
+          </select>
+        </div>
+        <select id="categoria">
+          <option value="General">Categoría: General</option>
+          <option value="Vivienda">Vivienda / Alquiler</option>
+          <option value="Alimentación">Alimentación</option>
+          <option value="Servicios">Servicios / Cuentas</option>
+          <option value="Inversión">Inversión / Ahorro</option>
+          <option value="Ocio">Ocio / Varios</option>
+        </select>
+        <button type="submit">Agregar Transacción</button>
+      </form>
+    </div>
+
+    <!-- Movimientos -->
+    <div class="card">
+      <h3>📋 Movimientos</h3>
+      <ul id="lista" class="lista-transacciones"></ul>
+    </div>
+
+    <!-- Herramientas de Respaldo -->
+    <div class="acciones-btn">
+      <button class="btn-secundario" onclick="exportarDatos()">📁 Guardar Copia</button>
+      <button class="btn-secundario" onclick="document.getElementById('file-input').click()">📥 Cargar Copia</button>
+      <input type="file" id="file-input" style="display: none;" accept=".json,application/json,text/plain,*/*" onchange="importarDatos(event)">
+    </div>
+    <div style="margin-top: 8px;">
+      <button class="btn-secundario" style="color: var(--rojo-suave); width: 100%;" onclick="borrarTodo()">🗑️ Limpiar Todo</button>
+    </div>
+  </div>
+
+  <footer>
+    Desarrollado con 💚 por <strong>Thaurock</strong>
+  </footer>
+
+  <script>
+    let datos = JSON.parse(localStorage.getItem('finanzas_verde_pro')) || {
+      registros: []
+    };
+
+    const coloresCat = {
+      'Vivienda': '#047857',
+      'Alimentación': '#10b981',
+      'Servicios': '#064e3b',
+      'Inversión': '#34d399',
+      'Ocio': '#f59e0b',
+      'General': '#6b7280'
+    };
+
+    const form = document.getElementById('form-registro');
+    const lista = document.getElementById('lista');
+
+    function actualizarUI() {
+      lista.innerHTML = '';
+      let ingresos = 0;
+      let gastos = 0;
+      let gastosPorCat = {};
+
+      if (Array.isArray(datos.registros)) {
+        datos.registros.forEach((item, index) => {
+          if (item.tipo === 'ingreso') {
+            ingresos += item.monto;
+          } else {
+            gastos += item.monto;
+            const cat = item.categoria || 'General';
+            gastosPorCat[cat] = (gastosPorCat[cat] || 0) + item.monto;
+          }
+
+          const li = document.createElement('li');
+          li.className = 'item-transaccion';
+          li.innerHTML = `
+            <div>
+              <strong>${item.concepto}</strong><br>
+              <span class="cat-badge">${item.categoria || 'General'}</span>
+            </div>
+            <div>
+              <span class="${item.tipo === 'ingreso' ? 'monto-ingreso' : 'monto-gasto'}">
+                ${item.tipo === 'ingreso' ? '+' : '-'}$${item.monto.toLocaleString()}
+              </span>
+              <button class="btn-borrar" onclick="eliminarRegistro(${index})">✕</button>
+            </div>
+          `;
+          lista.appendChild(li);
+        });
+      }
+
+      document.getElementById('total-ingresos').textContent = `$${ingresos.toLocaleString()}`;
+      document.getElementById('total-gastos').textContent = `$${gastos.toLocaleString()}`;
+      
+      const disponible = ingresos - gastos;
+      const dispElem = document.getElementById('total-disponible');
+      dispElem.textContent = `$${disponible.toLocaleString()}`;
+      dispElem.style.color = disponible < 0 ? 'var(--rojo-suave)' : 'var(--verde-principal)';
+
+      // Render de gráficos
+      renderGraficoBalance(ingresos, gastos, disponible);
+      renderGraficoCategorias(gastosPorCat, gastos);
+
+      localStorage.setItem('finanzas_verde_pro', JSON.stringify(datos));
+    }
+
+    function renderGraficoBalance(ingresos, gastos, disponible) {
+      const chartBox = document.getElementById('balance-chart');
+      const leyenda = document.getElementById('balance-legend');
+      leyenda.innerHTML = '';
+
+      if (ingresos === 0) {
+        chartBox.style.background = '#e5e7eb';
+        leyenda.innerHTML = '<span style="color:#6b7280; font-size:12px;">Sin ingresos registrados</span>';
+        return;
+      }
+
+      if (disponible <= 0) {
+        chartBox.style.background = 'var(--rojo-suave)';
+        leyenda.innerHTML = '<span style="color:var(--rojo-suave); font-weight:bold;">100% Consumido / Déficit</span>';
+        return;
+      }
+
+      const pctGastos = (gastos / ingresos) * 100;
+      const pctDisponible = (disponible / ingresos) * 100;
+
+      chartBox.style.background = `conic-gradient(
+        var(--rojo-suave) 0deg ${pctGastos * 3.6}deg,
+        var(--verde-principal) ${pctGastos * 3.6}deg 360deg
+      )`;
+
+      leyenda.innerHTML = `
+        <div class="legend-item">
+          <div class="color-box" style="background:var(--rojo-suave)"></div>
+          <span>Gastado: <strong>${pctGastos.toFixed(1)}%</strong></span>
+        </div>
+        <div class="legend-item">
+          <div class="color-box" style="background:var(--verde-principal)"></div>
+          <span>Disponible: <strong>${pctDisponible.toFixed(1)}%</strong></span>
+        </div>
+      `;
+    }
+
+    function renderGraficoCategorias(gastosPorCat, totalGastos) {
+      const chartBox = document.getElementById('pie-chart');
+      const leyenda = document.getElementById('chart-legend');
+      leyenda.innerHTML = '';
+
+      if (totalGastos === 0) {
+        chartBox.style.background = '#e5e7eb';
+        leyenda.innerHTML = '<span style="color:#6b7280; font-size:12px;">Sin gastos registrados</span>';
+        return;
+      }
+
+      let gradiente = [];
+      let anguloAcumulado = 0;
+
+      for (const [cat, monto] of Object.entries(gastosPorCat)) {
+        const porcentaje = (monto / totalGastos);
+        const grados = porcentaje * 360;
+        const color = coloresCat[cat] || coloresCat['General'];
+        
+        const inicio = anguloAcumulado;
+        anguloAcumulado += grados;
+
+        gradiente.push(`${color} ${inicio.toFixed(2)}deg ${anguloAcumulado.toFixed(2)}deg`);
+
+        const item = document.createElement('div');
+        item.className = 'legend-item';
+        item.innerHTML = `
+          <div class="color-box" style="background:${color}"></div>
+          <span>${cat}: <strong>${(porcentaje * 100).toFixed(0)}%</strong></span>
+        `;
+        leyenda.appendChild(item);
+      }
+
+      chartBox.style.background = `conic-gradient(${gradiente.join(', ')})`;
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const concepto = document.getElementById('concepto').value;
+      const monto = parseFloat(document.getElementById('monto').value);
+      const tipo = document.getElementById('tipo').value;
+      const categoria = document.getElementById('categoria').value;
+
+      datos.registros.push({ concepto, monto, tipo, categoria });
+      form.reset();
+      actualizarUI();
+    });
+
+    function eliminarRegistro(index) {
+      datos.registros.splice(index, 1);
+      actualizarUI();
+    }
+
+    function borrarTodo() {
+      if (confirm('¿Seguro que querés borrar todos los registros?')) {
+        datos = { registros: [] };
+        actualizarUI();
+      }
+    }
+
+    function exportarDatos() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datos));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "control_verde_thaurock.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importarDatos(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          datos = Array.isArray(parsed) ? { registros: parsed } : (parsed.registros ? parsed : { registros: [] });
+          actualizarUI();
+          alert('¡Copia de seguridad restaurada con éxito!');
+        } catch (err) {
+          alert('Error al leer el archivo.');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    actualizarUI();
+  </script>
+</body>
+</html>

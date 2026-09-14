@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Gradiente de fondo (Verde Oscuro) -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="100%" stop-color="#022c22" />
+    </linearGradient>
+
+    <!-- Gradiente del brote / hoja brillante -->
+    <linearGradient id="leafGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#6ee7b7" />
+    </linearGradient>
+  </defs>
+
+  <!-- Contenedor Base -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+
+  <!-- Anillo exterior estilo moneda -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#047857" stroke-width="20" />
+
+  <!-- Hoja principal -->
+  <path d="M 256 120 C 350 120 380 230 350 340 C 270 340 160 320 160 220 C 160 150 210 120 256 120 Z" fill="url(#leafGrad)" />
+
+  <!-- Tallo / Vena central -->
+  <path d="M 210 330 Q 256 260 290 180" fill="none" stroke="#064e3b" stroke-width="14" stroke-linecap="round" opacity="0.6" />
+</svg>
