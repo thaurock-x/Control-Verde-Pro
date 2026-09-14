@@ -56,3 +56,13 @@ No requiere proceso de compilación (*build step*) ni servidores backend:
 1. **Clonar el repositorio:**
    ```bash
    git clone [https://github.com/tu-usuario/control-verde-pro.git](https://github.com/tu-usuario/control-verde-pro.git)
+   ```
+---
+
+### ​📄 Licencia:
+
+<div align="center">
+Desarrollado con 💚 por <strong>Thaurock</strong>
+</div>
+
+
